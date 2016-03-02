@@ -1,5 +1,14 @@
 package models
 
+import (
+	"io/ioutil"
+	"log"
+	"os"
+	"path/filepath"
+
+	"gopkg.in/yaml.v2"
+)
+
 type GeneralReference struct {
 	Name string `yaml:"name" json:"name"`
 	Path string `yaml:"path" json:"path"`
@@ -31,4 +40,22 @@ type Component struct {
 	Verifications []VerificationReference `yaml:"verifications" json:"verifications"`
 	Satisfies     Satisfies               `yaml:"satsifies" json:"satsifies"`
 	SchemaVersion float32                 `yaml:"schema_version" json:"schema_version"`
+}
+
+func (system *System) LoadComponent(componentDir string) {
+	if _, err := os.Stat(filepath.Join(componentDir, "component.yaml")); err == nil {
+		var component *Component
+		componentData, err := ioutil.ReadFile(filepath.Join(componentDir, "component.yaml"))
+		if err != nil {
+			log.Println("here", err.Error())
+		}
+		err = yaml.Unmarshal(componentData, &component)
+		if err != nil {
+			log.Println(err.Error())
+		}
+		if component.Key == "" {
+			component.Key = getKey(componentDir)
+		}
+		system.Components[component.Key] = component
+	}
 }

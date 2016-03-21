@@ -2,7 +2,7 @@ package models
 
 import (
 	"io/ioutil"
-	"log"
+	"sort"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -16,7 +16,7 @@ type Control struct {
 
 // Standard struct is a collection of security requirements
 type Standard struct {
-	Key      string             `yaml:"name" json:"name"`
+	Name     string             `yaml:"name" json:"name"`
 	Controls map[string]Control `yaml:",inline"`
 }
 
@@ -24,6 +24,18 @@ type Standard struct {
 type Standards struct {
 	mapping map[string]*Standard
 	sync.RWMutex
+}
+
+// GetSortedData returns a list of sorted controls
+func (standard Standard) GetSortedData(callback func(string)) {
+	var controlNames []string
+	for controlName := range standard.Controls {
+		controlNames = append(controlNames, controlName)
+	}
+	sort.Strings(controlNames)
+	for _, controlName := range controlNames {
+		callback(controlName)
+	}
 }
 
 // NewStandards creates an instance of Components struct
@@ -34,15 +46,15 @@ func NewStandards() *Standards {
 // Add adds a standard to the standards mapping
 func (standards *Standards) Add(standard *Standard) {
 	standards.Lock()
-	standards.mapping[standard.Key] = standard
+	standards.mapping[standard.Name] = standard
 	standards.Unlock()
 }
 
 // Get retrieves a standard
-func (standards *Standards) Get(key string) *Standard {
+func (standards *Standards) Get(standardName string) *Standard {
 	standards.Lock()
 	defer standards.Unlock()
-	return standards.mapping[key]
+	return standards.mapping[standardName]
 }
 
 // GetAll retrieves all the standards
@@ -52,15 +64,16 @@ func (standards *Standards) GetAll() map[string]*Standard {
 
 // LoadStandard imports a standard into the Standard struct and adds it to the
 // main object.
-func (openControl *OpenControl) LoadStandard(standardFile string) {
+func (openControl *OpenControl) LoadStandard(standardFile string) error {
 	var standard Standard
 	standardData, err := ioutil.ReadFile(standardFile)
 	if err != nil {
-		log.Println(err.Error())
+		return ErrReadFile
 	}
 	err = yaml.Unmarshal(standardData, &standard)
 	if err != nil {
-		log.Println(err.Error())
+		return ErrStandardSchema
 	}
 	openControl.Standards.Add(&standard)
+	return nil
 }

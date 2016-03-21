@@ -6,10 +6,22 @@ type certificationTest struct {
 	certificationFile string
 	expected          Certification
 	expectedStandards int
+	expectedControls  int
+}
+
+type certificationTestError struct {
+	certificationFile string
+	expectedError     error
+}
+
+type standardOrderTest struct {
+	certification Certification
+	expectedOrder string
 }
 
 var certificationTests = []certificationTest{
-	{"./opencontrol_fixtures/certifications/LATO.yaml", Certification{Key: "LATO"}, 2},
+	// Test loading a certification file that has the LATO key, 2 standards, and 6 controls.
+	{"../fixtures/opencontrol_fixtures/certifications/LATO.yaml", Certification{Key: "LATO"}, 2, 6},
 }
 
 func TestLoadCertification(t *testing.T) {
@@ -17,11 +29,74 @@ func TestLoadCertification(t *testing.T) {
 		openControl := &OpenControl{}
 		openControl.LoadCertification(example.certificationFile)
 		actual := openControl.Certification
+		// Check if loaded certification has the expected key
 		if actual.Key != example.expected.Key {
 			t.Errorf("Expected %s, Actual: %s", example.expected.Key, actual.Key)
 		}
+		// Check if loaded certification has the expected number of standards
 		if len(actual.Standards) != example.expectedStandards {
 			t.Errorf("Expected %d, Actual: %d", example.expectedStandards, len(actual.Standards))
+		}
+		// Get the length of the control by using the GetSortedData method
+		totalControls := 0
+		actual.GetSortedData(func(_ string, _ string) {
+			totalControls++
+		})
+		// Check if loaded certification has the expected number of controls
+		if totalControls != example.expectedControls {
+			t.Errorf("Expected %d, Actual: %d", example.expectedControls, totalControls)
+		}
+	}
+}
+
+var certificationTestErrors = []certificationTestError{
+	// Test a file that can't be read
+	{"../fixtures/opencontrol_fixtures/certifications/", ErrReadFile},
+	// Test a file that has a broken schema
+	{"../fixtures/opencontrol_fixtures/components/EC2/artifact-ec2-1.png", ErrCertificationSchema},
+}
+
+func TestLoadCertificationErrors(t *testing.T) {
+	for _, example := range certificationTestErrors {
+		openControl := &OpenControl{}
+		actualError := openControl.LoadCertification(example.certificationFile)
+		// Check that the expected error is the actual error returned
+		if example.expectedError != actualError {
+			t.Errorf("Expected %s, Actual: %s", example.expectedError, actualError)
+		}
+	}
+}
+
+var standardOrderTests = []standardOrderTest{
+	{
+		// Check that data is returned in order given letters
+		Certification{Standards: map[string]Standard{
+			"A": Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+			"B": Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+			"C": Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+		}},
+		"A1A2A3B1B2B3C1C2C3",
+	},
+	{
+		// Check that data is returned in order given letters and numbers
+		Certification{Standards: map[string]Standard{
+			"1":  Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+			"B":  Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+			"B2": Standard{Controls: map[string]Control{"3": Control{}, "2": Control{}, "1": Control{}}},
+		}},
+		"111213B1B2B3B21B22B23",
+	},
+}
+
+func TestStandardOrder(t *testing.T) {
+	for _, example := range standardOrderTests {
+		actualOrder := ""
+		example.certification.GetSortedData(func(standardKey string, controlKey string) {
+			actualOrder += standardKey + controlKey
+		})
+		// Verify that the actual order is the expected order
+		if actualOrder != example.expectedOrder {
+			t.Errorf("Expected %s, Actual: %s", example.expectedOrder, actualOrder)
 		}
 	}
 }

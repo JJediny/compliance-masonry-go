@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
-	"github.com/opencontrol/compliance-masonry-go/renderers"
+	"github.com/opencontrol/compliance-masonry-go/gitbook"
 )
 
 func main() {
@@ -52,9 +52,10 @@ func main() {
 							if _, err := os.Stat(certificationPath); os.IsNotExist(err) {
 								println("Error: %s does not exist", certificationPath)
 							} else {
-								renderers.BuildGitbook(
+								gitbook.BuildGitbook(
 									opencontrolDir,
 									certificationPath,
+									"markdowns",
 									"exports",
 								)
 								println("New Gitbook Documentation Created")

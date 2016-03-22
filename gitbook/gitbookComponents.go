@@ -1,10 +1,12 @@
-package renderers
+package gitbook
 
 import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"sort"
+
+	"github.com/opencontrol/compliance-masonry-go/helpers"
 )
 
 func (component *ComponentGitbook) exportComponent() (string, string) {
@@ -34,7 +36,7 @@ func (component *ComponentGitbook) exportComponent() (string, string) {
 }
 
 func (openControl *OpenControlGitBook) exportComponents() {
-	componentsExportPath := createDirectory(filepath.Join(openControl.exportPath, "components"))
+	componentsExportPath := helpers.CreateDirectory(filepath.Join(openControl.exportPath, "components"))
 	for _, component := range openControl.Components.GetAll() {
 		componentsGitBook := ComponentGitbook{component, componentsExportPath}
 		componentPath, componentText := componentsGitBook.exportComponent()

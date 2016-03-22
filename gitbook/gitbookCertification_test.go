@@ -1,4 +1,4 @@
-package renderers
+package gitbook
 
 import (
 	"io/ioutil"
@@ -40,6 +40,7 @@ func TestExportControl(t *testing.T) {
 		defer os.RemoveAll(dir)
 		openControl := OpenControlGitBook{
 			models.LoadData(example.opencontrolDir, example.certificationPath),
+			"",
 			dir,
 		}
 		control := openControl.Standards.Get(example.standardKey).Controls[example.controlKey]

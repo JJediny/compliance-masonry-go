@@ -1,10 +1,10 @@
-package yaml
+package config
 
 import (
-	"github.com/opencontrol/compliance-masonry-go/yaml/common/mocks"
+	"github.com/opencontrol/compliance-masonry-go/config/common/mocks"
 	"github.com/stretchr/testify/assert"
-	"testing"
 	"github.com/vektra/errors"
+	"testing"
 )
 
 func TestBadInputsParse(t *testing.T) {

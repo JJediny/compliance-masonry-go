@@ -13,7 +13,7 @@ import (
 	"github.com/opencontrol/compliance-masonry-go/tools/fs"
 	"io/ioutil"
 	"log"
-	"github.com/opencontrol/compliance-masonry-go/tools/nested_map"
+	"github.com/opencontrol/compliance-masonry-go/tools/mapset"
 )
 
 func main() {
@@ -75,7 +75,7 @@ func main() {
 				destination := filepath.Join(wd, c.String("dest"))
 				err = Get(destination,
 					configBytes,
-					&common.ConfigWorker{Downloader: common.NewVCSDownloader(), Parser: parser.Parser{}, ResourceMap: nestedmap.Init()})
+					&common.ConfigWorker{Downloader: common.NewVCSDownloader(), Parser: parser.Parser{}, ResourceMap: mapset.Init()})
 				if err != nil {
 					fmt.Println(err)
 					os.Exit(1)

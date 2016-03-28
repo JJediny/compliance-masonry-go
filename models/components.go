@@ -13,10 +13,11 @@ import (
 // Satisfies struct contains data demonstrating why a specific component meets
 // a control
 type Satisfies struct {
-	ControlKey  string        `yaml:"control_key" json:"control_key"`
-	StandardKey string        `yaml:"standard_key" json:"standard_key"`
-	Narrative   string        `yaml:"narrative" json:"narrative"`
-	CoveredBy   CoveredByList `yaml:"covered_by" json:"covered_by"`
+	ControlKey           string        `yaml:"control_key" json:"control_key"`
+	StandardKey          string        `yaml:"standard_key" json:"standard_key"`
+	Narrative            string        `yaml:"narrative" json:"narrative"`
+	ImplementationStatus string        `yaml:"implementation_status" json:"implementation_status"`
+	CoveredBy            CoveredByList `yaml:"covered_by" json:"covered_by"`
 }
 
 // SatisfiesList is a list of Satisfies

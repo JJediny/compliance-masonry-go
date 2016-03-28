@@ -66,9 +66,19 @@ func main() {
 					fmt.Println(err)
 					os.Exit(1)
 				}
-				Get(c.String("dest"),
+				wd, err := os.Getwd()
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+				destination := filepath.Join(wd, c.String("dest"))
+				err = Get(destination,
 					configBytes,
 					&common.ConfigWorker{Downloader: common.NewVCSDownloader(), Parser: parser.Parser{}})
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
 				println("Compliance Dependencies Installed")
 			},
 		},
